@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Courier New', monospace;
+    overflow-x: hidden;
+  }
+}
+
+/* Retro Animations */
+@keyframes glitch {
+  0% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
+  25% { text-shadow: -2px 2px #ff00ff, 2px -2px #00ffff; }
+  50% { text-shadow: 2px -2px #ff00ff, -2px 2px #00ffff; }
+  75% { text-shadow: -2px -2px #ff00ff, 2px 2px #00ffff; }
+  100% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-track { background: #000; border: 2px solid #22d3ee; }
+::-webkit-scrollbar-thumb { background: #22d3ee; border: 2px solid #000; }
+::-webkit-scrollbar-thumb:hover { background: #f472b6; }
