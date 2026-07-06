@@ -4,6 +4,7 @@ import { RetroCard } from '../components/RetroCard';
 import { RetroInput } from '../components/RetroInput';
 import { RetroButton } from '../components/RetroButton';
 import { WalletConnect } from '../components/WalletConnect';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 interface LoginProps { onRegisterClick: () => void; }
 
@@ -91,11 +92,14 @@ export const Login: React.FC<LoginProps> = ({ onRegisterClick }) => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-cyan-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-theme-primary flex items-center justify-center p-4 transition-colors duration-400">
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 mb-2 uppercase tracking-wider">Kepler432B</h1>
-          <p className="text-cyan-400 text-lg font-bold uppercase tracking-wider">Investment Platform</p>
+          <p className="text-theme-secondary text-lg font-bold uppercase tracking-wider">Investment Platform</p>
         </div>
 
         {showForgot ? (
@@ -163,15 +167,15 @@ export const Login: React.FC<LoginProps> = ({ onRegisterClick }) => {
                 <div className="text-center text-gray-500 text-xs my-2">— or —</div>
                 <WalletConnect onSuccess={() => window.location.reload()} onSwitchToEmail={() => {}} />
 
-                <button type="button" onClick={() => setShowForgot(true)} className="text-pink-400 text-sm underline hover:text-cyan-400 w-full text-center cursor-pointer mt-2">
+                <button type="button" onClick={() => setShowForgot(true)} className="text-primary-500 text-sm underline hover:text-cyan-400 w-full text-center cursor-pointer mt-2">
                   Forgot Password?
                 </button>
               </form>
             ) : (
               <form onSubmit={handleAdmin} className="space-y-4">
-                <div className="bg-pink-400 border border-pink-600 rounded p-3">
-                  <p className="text-black font-bold text-center text-sm">🔐 ADMIN 3-STEP VERIFICATION</p>
-                  <p className="text-black text-xs text-center mt-1">Session expires in 5 minutes</p>
+                <div className="bg-theme-tertiary border border-theme rounded p-3">
+                  <p className="text-theme-primary font-bold text-center text-sm">🔐 ADMIN 3-STEP VERIFICATION</p>
+                  <p className="text-theme-muted text-xs text-center mt-1">Session expires in 5 minutes</p>
                 </div>
 
                 {/* Admin PIN 1 with show/hide */}
@@ -227,8 +231,8 @@ export const Login: React.FC<LoginProps> = ({ onRegisterClick }) => {
               </form>
             )}
 
-            <div className="mt-4 bg-black border border-gray-700 rounded p-3">
-              <p className="text-gray-500 text-xs text-center">🔒 All data from database · No localStorage</p>
+            <div className="mt-4 bg-theme-tertiary border border-theme rounded p-3">
+              <p className="text-theme-muted text-xs text-center">🔒 All data from database · No localStorage</p>
             </div>
           </RetroCard>
         )}
