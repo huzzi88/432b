@@ -94,11 +94,13 @@ export const vpnProtection = (req: Request, res: Response, next: NextFunction) =
   const forwarded = req.headers['x-forwarded-for'] as string || '';
   const realIp = req.headers['x-real-ip'] as string || '';
 
-  // Known VPN header patterns
+  // Known VPN header patterns - more aggressive detection
   const vpnIndicators = [
-    via.includes('proxy'),
-    via.includes('squid'),
+    via.toLowerCase().includes('proxy'),
+    via.toLowerCase().includes('squid'),
+    via.toLowerCase().includes('vpn'),
     forwarded.split(',').length > 3, // too many proxy hops
+    realIp !== '' && realIp !== clientIp, // conflicting IP headers
   ];
 
   // If VPN detected, block with a message

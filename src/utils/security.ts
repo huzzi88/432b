@@ -35,17 +35,31 @@ export const initSecurity = () => {
     return false;
   }, true);
 
-  // ─── 3. Detect DevTools opening (size-based detection) ───
+  // ─── 3. Detect DevTools opening (size-based detection + focus check) ───
+  // Note: This is a deterrent, not absolute protection. Determined users can bypass.
   const threshold = 160;
+  let wasDevToolsDetected = false;
+  
   const detectDevTools = () => {
-    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    const widthThreshold = widthDiff > threshold;
+    const heightThreshold = heightDiff > threshold;
+    
+    // Additional check: if window lost focus and size changed significantly
     if (widthThreshold || heightThreshold) {
-      document.body.style.display = 'none';
-      setTimeout(() => { document.body.style.display = ''; }, 1000);
+      if (!wasDevToolsDetected) {
+        wasDevToolsDetected = true;
+        document.body.style.display = 'none';
+        setTimeout(() => { document.body.style.display = ''; wasDevToolsDetected = false; }, 2000);
+      }
     }
   };
-  setInterval(detectDevTools, 3000);
+  
+  // Also check on window resize and blur events for better detection
+  window.addEventListener('resize', detectDevTools);
+  window.addEventListener('blur', () => { setTimeout(detectDevTools, 100); });
+  setInterval(detectDevTools, 2000);
 
   // ─── 4. Block text selection on sensitive elements ───
   document.addEventListener('selectstart', (e) => {
