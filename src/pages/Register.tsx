@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { RetroCard } from '../components/RetroCard';
 import { RetroInput } from '../components/RetroInput';
 import { RetroButton } from '../components/RetroButton';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 interface RegisterProps { onLoginClick: () => void; }
 
@@ -11,7 +12,7 @@ const EyeIcon = ({ shown, onClick }: { shown: boolean; onClick: () => void }) =>
   <button
     type="button"
     onClick={onClick}
-    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 cursor-pointer z-10"
+    className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-cyan-400 cursor-pointer z-10"
     tabIndex={-1}
   >
     {shown ? (
@@ -85,15 +86,18 @@ export const Register: React.FC<RegisterProps> = ({ onLoginClick }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-cyan-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-theme-primary flex items-center justify-center p-4 transition-colors duration-400">
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 mb-2 uppercase tracking-wider">Kepler432B</h1>
-          <p className="text-cyan-400 text-lg font-bold uppercase tracking-wider">Create Account</p>
+          <p className="text-theme-secondary text-lg font-bold uppercase tracking-wider">Create Account</p>
         </div>
 
         <RetroCard color="purple">
-          <h2 className="text-2xl font-bold text-purple-400 mb-6 uppercase tracking-wider">Register</h2>
+          <h2 className="text-2xl font-bold text-theme-primary mb-6 uppercase tracking-wider">Register</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <RetroInput label="Full Name *" value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" disabled={isLoading} />
@@ -117,14 +121,14 @@ export const Register: React.FC<RegisterProps> = ({ onLoginClick }) => {
                 <div className="mt-2">
                   <div className="flex gap-1 mb-1">
                     {[0, 1, 2, 3, 4, 5].map(i => (
-                      <div key={i} className={`h-1 flex-1 ${i < pwStrength.score ? (pwStrength.score >= 4 ? 'bg-green-400' : pwStrength.score >= 2 ? 'bg-yellow-400' : 'bg-red-400') : 'bg-gray-700'}`} />
+                      <div key={i} className={`h-1 flex-1 ${i < pwStrength.score ? (pwStrength.score >= 4 ? 'bg-green-400' : pwStrength.score >= 2 ? 'bg-yellow-400' : 'bg-red-400') : 'bg-theme-tertiary'}`} />
                     ))}
                   </div>
                   <p className={`text-xs font-bold ${pwStrength.score >= 4 ? 'text-green-400' : pwStrength.score >= 2 ? 'text-yellow-400' : 'text-red-400'}`}>
                     Strength: {pwStrength.label}
                   </p>
                   {pwStrength.tips.length > 0 && (
-                    <ul className="text-gray-500 text-xs mt-1">
+                    <ul className="text-theme-muted text-xs mt-1">
                       {pwStrength.tips.map((tip, i) => (<li key={i}>• {tip}</li>))}
                     </ul>
                   )}
@@ -204,7 +208,7 @@ export const Register: React.FC<RegisterProps> = ({ onLoginClick }) => {
             </div>
           </form>
 
-          <p className="text-gray-500 text-xs text-center mt-4">
+          <p className="text-theme-muted text-xs text-center mt-4">
             By registering, you agree to our Terms & Conditions. Investment involves risk.
           </p>
         </RetroCard>
