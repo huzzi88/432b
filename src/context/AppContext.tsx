@@ -5,6 +5,7 @@ import { api, setToken, getToken } from '../utils/api';
 
 interface Ctx {
   currentUser: User|null; isAdmin: boolean; isLoading: boolean; apiError: string|null;
+  isDarkMode: boolean; toggleTheme: () => void;
   login: (e:string,p:string,pin:string)=>Promise<any>; verifyAdminPins: (p1:string,p2:string,p3:string)=>Promise<any>;
   register: (n:string,e:string,p:string,pin:string,ref?:string)=>Promise<any>; logout: ()=>void;
   users: User[]; walletUsers: any[]; plans: InvestmentPlan[]; slots: any[]; lots: any[];
@@ -52,6 +53,15 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
   const [currentUser,setCurrentUser]=useState<User|null>(null);
   const [isLoading,setIsLoading]=useState(true);
   const [apiError,setApiError]=useState<string|null>(null);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    // Check localStorage first, then system preference
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
   const [users,setUsers]=useState<User[]>([]);
   const [walletUsers,setWalletUsers]=useState<any[]>([]);
   const [plans,setPlans]=useState<InvestmentPlan[]>([]);
@@ -68,6 +78,26 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
   const [blogCategories,setBlogCategories]=useState<any[]>([]);
   const [blogPosts,setBlogPosts]=useState<any[]>([]);
   const [pendingAdminId,setPendingAdminId]=useState<string|null>(null);
+
+  // Theme toggle
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+    // Add smooth transition class during theme change
+    root.classList.add('theme-transition');
+    const timer = setTimeout(() => root.classList.remove('theme-transition'), 400);
+    return () => clearTimeout(timer);
+  }, [isDarkMode]);
+
+  const toggleTheme = useCallback(() => {
+    setIsDarkMode(prev => !prev);
+  }, []);
 
   // Session restore
   useEffect(()=>{(async()=>{const t=getToken();if(!t){setIsLoading(false);return;} try{const d=await api.getProfile();if(d.user)setCurrentUser(d.user as User);else setToken(null);}catch{setToken(null);}finally{setIsLoading(false);}})();},[]);
@@ -177,9 +207,9 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
 
   const isAdmin=currentUser?.isAdmin===true;
 
-  if(isLoading) return <div className="min-h-screen bg-black flex items-center justify-center"><div className="text-center"><h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 mb-4 uppercase">Kepler432B</h1><div className="text-cyan-400 text-lg font-bold animate-pulse">Connecting...</div></div></div>;
+  if(isLoading) return <div className="min-h-screen bg-theme-primary flex items-center justify-center"><div className="text-center"><h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 mb-4 uppercase">Kepler432B</h1><div className="text-cyan-400 text-lg font-bold animate-pulse">Connecting...</div></div></div>;
 
-  return <AppContext.Provider value={{currentUser,isAdmin,isLoading,apiError,login,verifyAdminPins,register,logout,users,walletUsers,plans,slots,lots,investments,transactions,paymentGateways,notifications,tasks,competitions,competitionEntries,kycDocs,blogCategories,blogPosts,refreshUsers,refreshWalletUsers,refreshPlans,refreshSlots,refreshLots,refreshInvestments,refreshTransactions,refreshGateways,refreshNotifications,refreshTasks,refreshProfile,refreshCompetitions,refreshKYC,refreshBlogs,refreshAll,apiUpdateUserBalance,apiBlockUser,apiUpdateUser,apiCreatePlan,apiUpdatePlan,apiDeletePlan,apiCreateSlot,apiUpdateSlot,apiDeleteSlot,apiCreateLot,apiUpdateLot,apiDeleteLot,apiUpdateTransaction,apiReviewInvestment,apiCreateGateway,apiUpdateGateway,apiDeleteGateway,apiCreateNotification,apiUpdateNotification,apiCreateTask,apiReviewTask,apiReviewKYC,apiCreateCompetition,apiUpdateCompetition,apiDeleteCompetition,apiCreateBlogCategory,apiUpdateBlogCategory,apiDeleteBlogCategory,apiCreateBlogPost,apiUpdateBlogPost,apiDeleteBlogPost,apiExportTable,apiImportTable,apiGetCurrentROI,apiGetROIHistory,apiSetDailyROI,apiUpdateROIDate,apiConvertCurrency,apiDeposit,apiWithdraw,apiInvest,apiSubmitTask,apiSubmitKYC,apiUpdateProfile,apiForgotPassword,apiJoinCompetition}}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={{currentUser,isAdmin,isLoading,apiError,isDarkMode,toggleTheme,login,verifyAdminPins,register,logout,users,walletUsers,plans,slots,lots,investments,transactions,paymentGateways,notifications,tasks,competitions,competitionEntries,kycDocs,blogCategories,blogPosts,refreshUsers,refreshWalletUsers,refreshPlans,refreshSlots,refreshLots,refreshInvestments,refreshTransactions,refreshGateways,refreshNotifications,refreshTasks,refreshProfile,refreshCompetitions,refreshKYC,refreshBlogs,refreshAll,apiUpdateUserBalance,apiBlockUser,apiUpdateUser,apiCreatePlan,apiUpdatePlan,apiDeletePlan,apiCreateSlot,apiUpdateSlot,apiDeleteSlot,apiCreateLot,apiUpdateLot,apiDeleteLot,apiUpdateTransaction,apiReviewInvestment,apiCreateGateway,apiUpdateGateway,apiDeleteGateway,apiCreateNotification,apiUpdateNotification,apiCreateTask,apiReviewTask,apiReviewKYC,apiCreateCompetition,apiUpdateCompetition,apiDeleteCompetition,apiCreateBlogCategory,apiUpdateBlogCategory,apiDeleteBlogCategory,apiCreateBlogPost,apiUpdateBlogPost,apiDeleteBlogPost,apiExportTable,apiImportTable,apiGetCurrentROI,apiGetROIHistory,apiSetDailyROI,apiUpdateROIDate,apiConvertCurrency,apiDeposit,apiWithdraw,apiInvest,apiSubmitTask,apiSubmitKYC,apiUpdateProfile,apiForgotPassword,apiJoinCompetition}}>{children}</AppContext.Provider>;
 };
 
 export const useApp=()=>{const c=useContext(AppContext);if(!c)throw new Error('useApp must be within AppProvider');return c;};

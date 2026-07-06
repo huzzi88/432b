@@ -15,12 +15,16 @@ router.get('/', async (_req, res) => {
 });
 
 router.post('/', authenticate, adminOnly, async (req, res) => {
-  const { title, message } = req.body;
+  const { title, message, isActive } = req.body;
   if (!title || !message) return res.status(400).json({ error: 'title and message required' });
   try {
-    await pool.query('INSERT INTO notifications (title, message) VALUES ($1, $2)', [title, message]);
+    // Explicitly set isActive to boolean true/false instead of relying on DB default
+    await pool.query('INSERT INTO notifications (title, message, is_active) VALUES ($1, $2, $3)', [title, message, isActive === false ? false : true]);
     res.status(201).json({ success: true });
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed' }); }
+  } catch (err: any) { 
+    console.error('Notification creation error:', err); 
+    res.status(500).json({ error: 'Failed to create notification' }); 
+  }
 });
 
 router.put('/:id', authenticate, adminOnly, async (req, res) => {

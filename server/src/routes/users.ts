@@ -21,12 +21,20 @@ router.put('/users/:id/balance', authenticate, adminOnly, async (req: AuthReques
   const { id } = req.params;
   const { amount, type } = req.body;
   if (!amount || !type) return res.status(400).json({ error: 'amount and type required' });
+  if (!['add', 'subtract'].includes(type)) return res.status(400).json({ error: 'type must be add or subtract' });
+  
   const op = type === 'add' ? '+' : '-';
   try {
-    await pool.query(`UPDATE users SET balance = balance ${op} $1, updated_at = NOW() WHERE id = $2`, [Math.abs(amount), id]);
+    // Use parameterized query - op is validated above and safe to use in SQL syntax
+    // The operator is hardcoded based on validated input, not user-controlled
+    const operator = type === 'add' ? '+' : '-';
+    await pool.query(`UPDATE users SET balance = balance ${operator} $1, updated_at = NOW() WHERE id = $2`, [Math.abs(amount), id]);
     await logActivity(req.user.id, 'BALANCE_UPDATE', `Admin ${type} $${amount} for user ${id}`, req);
     res.json({ success: true });
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed' }); }
+  } catch (err: any) { 
+    console.error('Balance update error:', err); 
+    res.status(500).json({ error: 'Failed to update balance' }); 
+  }
 });
 
 // BLOCK / UNBLOCK user (admin)
@@ -88,23 +96,32 @@ router.post('/kyc/submit', authenticate, async (req: AuthRequest, res) => {
   if (!cnic_number?.trim()) return res.status(400).json({ error: 'CNIC number required' });
   if (!cnic_front_image?.trim()) return res.status(400).json({ error: 'CNIC front image is required (upload or take photo)' });
 
-  // Validate image is base64
+  // Validate image format and size
   if (!cnic_front_image.startsWith('data:image/')) {
     return res.status(400).json({ error: 'Invalid image format. Must be a JPEG or PNG image.' });
   }
 
-  // Validate image size (max 5MB base64 ~ 6.6MB encoded)
-  if (cnic_front_image.length > 7000000) {
-    return res.status(400).json({ error: 'Image too large. Max 5MB.' });
+  // Max 2MB base64 encoded image (stricter limit for security)
+  const MAX_IMAGE_SIZE = 2000000;
+  if (cnic_front_image.length > MAX_IMAGE_SIZE) {
+    return res.status(400).json({ error: 'Image too large. Max 2MB.' });
   }
 
   try {
-    // Check if already pending
-    const existing = await pool.query("SELECT id FROM kyc_documents WHERE user_id = $1 AND status = 'pending'", [req.user.id]);
+    // Check if already pending - validate uniqueness of submission
+    const existing = await pool.query("SELECT cnic_number, cnic_front_image FROM kyc_documents WHERE user_id = $1 AND status = 'pending'", [req.user.id]);
     if (existing.rows.length > 0) {
-      // Update existing pending KYC
-      await pool.query("UPDATE kyc_documents SET cnic_number = $1, cnic_front_image = $2, updated_at = NOW() WHERE user_id = $3 AND status = 'pending'",
-        [cnic_number.trim(), cnic_front_image, req.user.id]);
+      const existingCnic = existing.rows[0].cnic_number;
+      const existingImage = existing.rows[0].cnic_front_image;
+      
+      // Only allow update if CNIC or image is actually different
+      if (cnic_number.trim() !== existingCnic || cnic_front_image !== existingImage) {
+        await pool.query("UPDATE kyc_documents SET cnic_number = $1, cnic_front_image = $2, updated_at = NOW() WHERE user_id = $3 AND status = 'pending'",
+          [cnic_number.trim(), cnic_front_image, req.user.id]);
+      } else {
+        // Same data submitted again - return success without updating
+        return res.json({ success: true, message: 'KYC already pending with same data' });
+      }
     } else {
       // Create new KYC document
       await pool.query('INSERT INTO kyc_documents (user_id, cnic_number, cnic_front_image) VALUES ($1, $2, $3)',
