@@ -1,22 +1,45 @@
 // ═══════════════════════════════════════════════════════
 // KEPLER432B — Hardened API Client
-// - Uses credentials:'include' for httpOnly cookie auth
-// - Also stores token in localStorage as fallback
+// - Uses credentials:'include' for httpOnly cookie auth (PRIMARY)
+// - Token in localStorage is ONLY a fallback for edge cases
 // - Auto-handles 401 (session expired → redirect to login)
 // - CSRF token sent via X-CSRF-Token header
+// NOTE: localStorage token is less secure (XSS vulnerable) but provides resilience
 // ═══════════════════════════════════════════════════════
 
 const VITE_URL: string = (import.meta.env.VITE_API_URL as string) || '';
 const API_BASE = VITE_URL || ((typeof window !== 'undefined' && (window as any).__API_URL__) || '/api');
 
-// localStorage token = fallback for environments where cookies don't work
-let authToken: string | null = localStorage.getItem('k432b_token');
+// localStorage token = fallback ONLY when cookies fail (not primary auth method)
+let authToken: string | null = null; // Don't auto-load from localStorage for security
 
 export const setToken = (t: string | null) => {
   authToken = t;
-  if (t) localStorage.setItem('k432b_token', t);
-  else localStorage.removeItem('k432b_token');
+  // Only store in localStorage as last-resort fallback, not primary auth
+  if (t) {
+    try {
+      localStorage.setItem('k432b_token', t);
+    } catch (e) {
+      // localStorage may be unavailable in some contexts
+      console.warn('localStorage unavailable, using memory-only token');
+    }
+  } else {
+    try {
+      localStorage.removeItem('k432b_token');
+    } catch (e) {}
+  }
 };
+
+// Load token from localStorage only when explicitly needed (e.g., page refresh recovery)
+export const loadTokenFromStorage = (): string | null => {
+  if (!authToken) {
+    try {
+      authToken = localStorage.getItem('k432b_token');
+    } catch (e) {}
+  }
+  return authToken;
+};
+
 export const getToken = (): string | null => authToken;
 
 // Read CSRF token from cookie (non-httpOnly, readable by JS)

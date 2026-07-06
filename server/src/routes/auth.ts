@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
       const ref = await pool.query('SELECT id FROM users WHERE referral_code = $1', [referral_code.toUpperCase()]);
       if (ref.rows.length === 0) return res.status(400).json({ error: 'Invalid referral code' });
       referredBy = referral_code.toUpperCase();
-      await pool.query('UPDATE users SET referral_count = referral_count + 1 WHERE referral_code = $1', [referredBy]);
+      // Increment referral count AFTER user creation to prevent race condition
     }
 
     const hashedPw = await bcrypt.hash(password, ROUNDS);
@@ -42,6 +42,11 @@ router.post('/register', async (req, res) => {
       'INSERT INTO users (name, email, password, login_pin, referral_code, referred_by) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
       [name.trim(), email.toLowerCase().trim(), hashedPw, hashedPin, refCode, referredBy]
     );
+
+    // Increment referral count AFTER successful user creation
+    if (referredBy) {
+      await pool.query('UPDATE users SET referral_count = referral_count + 1 WHERE referral_code = $1', [referredBy]);
+    }
 
     await logActivity(result.rows[0].id, 'REGISTER', `New user: ${email}`, req);
     res.status(201).json({ success: true, user: formatUser(result.rows[0]) });

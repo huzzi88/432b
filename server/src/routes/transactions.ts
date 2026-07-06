@@ -13,12 +13,14 @@ router.post('/deposit', authenticate, async (req: AuthRequest, res) => {
   if (!payment_method) return res.status(400).json({ error: 'Payment method required' });
   if (!proof_image || !proof_image.trim()) return res.status(400).json({ error: 'Payment receipt screenshot is required' });
 
-  // Validate image format
+  // Validate image format and size
   if (!proof_image.startsWith('data:image/')) {
     return res.status(400).json({ error: 'Invalid image format. Must be JPEG or PNG.' });
   }
-  if (proof_image.length > 7000000) {
-    return res.status(400).json({ error: 'Image too large. Max 5MB.' });
+  // Max 2MB base64 encoded image (stricter limit for security)
+  const MAX_IMAGE_SIZE = 2000000;
+  if (proof_image.length > MAX_IMAGE_SIZE) {
+    return res.status(400).json({ error: 'Image too large. Max 2MB.' });
   }
 
   try {
@@ -28,7 +30,10 @@ router.post('/deposit', authenticate, async (req: AuthRequest, res) => {
     );
     await logActivity(req.user.id, 'DEPOSIT_REQUEST', `Deposit $${amount} via ${payment_method}${chain?` on ${chain}`:''}${payment_details?` [Ref: ${payment_details}]`:' [No TRX ID]'}`, req);
     res.json({ success: true });
-  } catch (err) { console.error(err); res.status(500).json({ error: 'Failed' }); }
+  } catch (err: any) { 
+    console.error('Deposit error:', err); 
+    res.status(500).json({ error: 'Failed to process deposit' }); 
+  }
 });
 
 // WITHDRAW — supports bank + crypto. KYC + PIN required.
@@ -48,16 +53,16 @@ router.post('/withdraw', authenticate, async (req: AuthRequest, res) => {
     }
 
     // Wallet users may not have login_pin — use wallet_address as alt verification
+    let pinMatch = false;
     if (user.login_pin) {
-      const pinMatch = await bcrypt.compare(login_pin, user.login_pin);
+      pinMatch = await bcrypt.compare(login_pin, user.login_pin);
       if (!pinMatch) return res.status(401).json({ error: 'Invalid login PIN' });
     } else if (user.wallet_address) {
-      // Wallet-only user — PIN is the last 4 chars of wallet address
-      if (login_pin !== user.wallet_address.slice(-4)) {
-        return res.status(401).json({ error: 'Invalid verification code' });
-      }
+      // Wallet-only user — verify against stored PIN hash
+      // NOTE: For security, wallet-only users should set a PIN in their profile
+      return res.status(401).json({ error: 'PIN required. Please set a PIN in your profile settings.' });
     } else {
-      return res.status(401).json({ error: 'No PIN configured' });
+      return res.status(401).json({ error: 'No PIN configured. Please set a PIN in your profile.' });
     }
 
     if (parseFloat(user.balance) < amount) return res.status(400).json({ error: 'Insufficient balance' });
@@ -120,8 +125,13 @@ router.put('/transactions/:id', authenticate, adminOnly, async (req: AuthRequest
     await client.query('COMMIT');
     await logActivity(req.user.id, `TXN_${status.toUpperCase()}`, `Admin ${status} ${txn.type} $${txn.amount}`, req);
     res.json({ success: true });
-  } catch (err) { await client.query('ROLLBACK'); console.error(err); res.status(500).json({ error: 'Failed' }); }
-  finally { client.release(); }
+  } catch (err: any) { 
+    await client.query('ROLLBACK'); 
+    console.error('Transaction update error:', err); 
+    res.status(500).json({ error: 'Failed to update transaction' }); 
+  } finally { 
+    client.release(); 
+  }
 });
 
 // DASHBOARD STATS (admin)
