@@ -38,10 +38,10 @@ export const Landing: React.FC = () => {
           </h2>
           <p className="text-xl text-gray-300 mb-8">Join thousands of investors earning daily returns with our secure, automated investment platform.</p>
           <div className="flex gap-4 justify-center">
-          <button onClick={() => navigate('/dashboard')} className="px-8 py-4 bg-gradient-to-r from-cyan-400 to-pink-400 text-black font-bold text-lg rounded-lg hover:opacity-90 transition flex items-center gap-2">
+          <button onClick={() => navigate('/dashboard')} className="px-8 py-4 bg-gradient-to-r from-cyan-400 to-pink-400 text-black font-bold text-lg rounded-lg hover:opacity-90 transition flex items-center gap-2 shadow-lg glow-theme">
             Get Started <ChevronRight className="w-5 h-5" />
           </button>
-            <a href="#features" className="px-8 py-4 bg-white/10 text-white font-bold text-lg rounded-lg hover:bg-white/20 transition">Learn More</a>
+            <a href="#features" className="px-8 py-4 bg-white/10 text-white font-bold text-lg rounded-lg hover:bg-white/20 transition backdrop-blur">Learn More</a>
           </div>
         </div>
       </section>
@@ -52,10 +52,10 @@ export const Landing: React.FC = () => {
           <h2 className="text-4xl font-bold text-white text-center mb-12">Why Choose Kepler432B?</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((f, i) => (
-              <div key={i} className="bg-black/50 border border-cyan-400/20 rounded-lg p-6 hover:border-cyan-400/40 transition">
-                <div className="text-cyan-400 mb-4">{f.icon}</div>
-                <h3 className="text-xl font-bold text-white mb-2">{f.title}</h3>
-                <p className="text-gray-400">{f.desc}</p>
+              <div key={i} className="bg-theme-secondary/50 border border-theme rounded-lg p-6 hover:border-primary-500/40 transition shadow-theme">
+                <div className="text-primary-500 mb-4">{f.icon}</div>
+                <h3 className="text-xl font-bold text-theme-primary mb-2">{f.title}</h3>
+                <p className="text-theme-secondary">{f.desc}</p>
               </div>
             ))}
           </div>

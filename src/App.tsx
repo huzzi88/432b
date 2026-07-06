@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
+import { ThemeToggle } from './components/ThemeToggle';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { UserDashboard } from './pages/UserDashboard';
@@ -23,18 +24,19 @@ const LandingHeader: React.FC<{ onLogin: () => void; onRegister: () => void }> =
 
   if (currentUser) {
     return (
-      <header className="bg-black/50 backdrop-blur border-b border-cyan-400/20 sticky top-0 z-50">
+      <header className="bg-theme-secondary/80 backdrop-blur border-b border-theme sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <span className="text-3xl">🪐</span>
             <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-400">Kepler432B</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-cyan-400 font-bold hidden sm:inline">👤 {currentUser.name}</span>
-            <button onClick={() => window.location.href = '/dashboard'} className="px-6 py-2 bg-cyan-400 text-black font-bold rounded hover:bg-cyan-300 transition">
+            <ThemeToggle />
+            <span className="text-theme-secondary font-bold hidden sm:inline">👤 {currentUser.name}</span>
+            <button onClick={() => window.location.href = '/dashboard'} className="px-6 py-2 bg-primary-500 text-white font-bold rounded hover:bg-primary-600 transition shadow-lg">
               Dashboard
             </button>
-            <button onClick={logout} className="px-6 py-2 bg-pink-400 text-black font-bold rounded hover:bg-pink-300 transition">
+            <button onClick={logout} className="px-6 py-2 bg-secondary-500 text-white font-bold rounded hover:bg-secondary-600 transition shadow-lg">
               Logout
             </button>
           </div>
@@ -44,15 +46,16 @@ const LandingHeader: React.FC<{ onLogin: () => void; onRegister: () => void }> =
   }
 
   return (
-    <header className="bg-black/50 backdrop-blur border-b border-cyan-400/20 sticky top-0 z-50">
+    <header className="bg-theme-secondary/80 backdrop-blur border-b border-theme sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="text-3xl">🪐</span>
           <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-400">Kepler432B</h1>
         </div>
-        <div className="flex gap-3">
-          <button onClick={onLogin} className="px-6 py-2 bg-cyan-400 text-black font-bold rounded hover:bg-cyan-300 transition">Login</button>
-          <button onClick={onRegister} className="px-6 py-2 bg-pink-400 text-black font-bold rounded hover:bg-pink-300 transition">Create Account</button>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <button onClick={onLogin} className="px-6 py-2 bg-primary-500 text-white font-bold rounded hover:bg-primary-600 transition shadow-lg">Login</button>
+          <button onClick={onRegister} className="px-6 py-2 bg-secondary-500 text-white font-bold rounded hover:bg-secondary-600 transition shadow-lg">Create Account</button>
         </div>
       </div>
     </header>

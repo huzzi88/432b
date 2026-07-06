@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+:root {
+  /* Light Theme Variables */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border-color: #e2e8f0;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --glow-color: rgba(14, 165, 233, 0.3);
+}
+
+.dark {
+  /* Dark Theme Variables */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  --glow-color: rgba(14, 165, 233, 0.5);
+}
+
 @layer base {
   * {
     margin: 0;
@@ -8,8 +34,20 @@
   }
   
   body {
-    font-family: 'Courier New', monospace;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+  
+  /* Smooth transitions for theme changes */
+  .theme-transition,
+  .theme-transition * {
+    transition: background-color 0.4s ease, 
+                color 0.4s ease, 
+                border-color 0.4s ease, 
+                box-shadow 0.4s ease !important;
   }
 }
 
@@ -22,8 +60,27 @@
   100% { text-shadow: 2px 2px #ff00ff, -2px -2px #00ffff; }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Light Mode */
 ::-webkit-scrollbar { width: 12px; }
-::-webkit-scrollbar-track { background: #000; border: 2px solid #22d3ee; }
-::-webkit-scrollbar-thumb { background: #22d3ee; border: 2px solid #000; }
-::-webkit-scrollbar-thumb:hover { background: #f472b6; }
+::-webkit-scrollbar-track { 
+  background: var(--bg-tertiary); 
+  border: 2px solid var(--border-color); 
+}
+::-webkit-scrollbar-thumb { 
+  background: #0ea5e9; 
+  border: 2px solid var(--bg-tertiary); 
+}
+::-webkit-scrollbar-thumb:hover { 
+  background: #d946ef; 
+}
+
+/* Utility Classes for Theme */
+.bg-theme-primary { background-color: var(--bg-primary); }
+.bg-theme-secondary { background-color: var(--bg-secondary); }
+.bg-theme-tertiary { background-color: var(--bg-tertiary); }
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-muted { color: var(--text-muted); }
+.border-theme { border-color: var(--border-color); }
+.shadow-theme { box-shadow: var(--card-shadow); }
+.glow-theme { box-shadow: 0 0 20px var(--glow-color); }

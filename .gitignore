@@ -7,19 +7,17 @@ node_modules/
 .env.local
 .env.*
 
-# Logs
-*.log
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
 # IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+target/
 
 # Python cache
 __pycache__/
@@ -27,25 +25,52 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Build outputs
-dist/
-build/
-*.out
-
 # Temporary files
 *.tmp
+*.swp
+*~
 
 # OS files
 .DS_Store
 Thumbs.db
 
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
 # Package lock files
 package-lock.json
 yarn.lock
 
-# Testing
-.mypy_cache/
-.pytest_cache/
+# Runtime data
+.pnp
+.pnp.js
+
+# Local configuration
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Security
+.secret
+.secrets
+
+# Cache directories
+.cache/
 .nyc_output/
-coverage.xml
+coverage/
+lib-cov/
+
+# TypeScript
+*.tsbuildinfo
+.next/
+nuxt/
 ```
